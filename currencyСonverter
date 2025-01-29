@@ -1,0 +1,66 @@
+package main
+
+import (
+	"fmt"
+	"sort"
+)
+
+func main() {
+	// Курс валют относительно 1 USD
+	var rates = map[string]float64{
+		"USD": 1.0,   // Доллар США
+		"EUR": 0.92,  // Евро
+		"RUB": 90.0,  // Российский рубль
+		"JPY": 157.0, // Японская иена
+		"CNY": 7.25,  // Китайский юань
+		"GBP": 0.78,  // Британский фунт
+		"KZT": 460.0, // Казахстанский тенге
+		"TRY": 32.5,  // Турецкая лира
+		"INR": 83.0,  // Индийская рупия
+		"BRL": 5.12,  // Бразильский реал
+		"AUD": 1.50,  // Австралийский доллар
+		"CAD": 1.36,  // Канадский доллар
+		"CHF": 0.89,  // Швейцарский франк
+		"SEK": 10.8,  // Шведская крона
+		"NOK": 10.5,  // Норвежская крона
+	}
+
+  // генерируем слайс валют для удобства
+	currency := make([]string, 0)
+	for cur, _ := range rates {
+		currency = append(currency, cur)
+	}
+	sort.Strings(currency)
+
+	fmt.Println("Добро пожаловать в конвертер валют!")
+	fmt.Println("Доступные валюты для конвертации:")
+	for i, cur := range currency {
+		fmt.Printf("%d. %s\n", i+1, cur)
+	}
+
+	for {
+		fmt.Print("Введите сумму в долларах: ")
+		var amount float64
+		fmt.Scan(&amount)
+
+		if amount <= 0 {
+			fmt.Println("Сумма должна превышать 0!")
+			continue
+		}
+
+		fmt.Println("Выберите номер валюты для конвертации из списка выше:")
+		var rate int
+		fmt.Scan(&rate)
+
+		if rate <= 0 || rate > len(currency) {
+			fmt.Println("Неправильный выбор валюты!")
+			continue
+		}
+
+		selectedCurrency := currency[rate-1]
+
+		conversionRate := rates[selectedCurrency]
+		convertedAmount := amount * conversionRate
+		fmt.Printf("%.2f USD = %.2f %s\n", amount, convertedAmount, selectedCurrency)
+	}
+}
