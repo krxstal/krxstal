@@ -1,0 +1,92 @@
+package main
+
+import (
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+	"math/rand"
+	"strconv"
+)
+
+const (
+	MaxGuessesAmount = 10
+	MaxGuess         = 300
+	MinGuess         = 0
+)
+
+func main() {
+	// Создаем приложение и окно
+	myApp := app.New()
+	myWindow := myApp.NewWindow("Угадайка!")
+
+	// инициализируем переменные для числа компьютера и кол-ва попыток
+	var computerGuess, guessesLeft = 0, -1
+
+	// 1/5 компонент – Лэйбл который показывает кол-во попыток
+	computerGuessLabel := widget.NewLabel("Нажмите кнопку ниже, чтобы компьютер загадал число между 0 и 300!")
+
+	// 2/5 компонент – Кнопка старта игры
+	startGameButton := widget.NewButton("Загадать новое число!", func() {
+		computerGuess = rand.Int() % 300
+		guessesLeft = MaxGuessesAmount
+		computerGuessLabel.SetText("Компьютер загадал число! Попыток осталось: " + strconv.Itoa(guessesLeft))
+	})
+
+	// 3/5 компонент – Лэйбл который подсказывает выше ли наше число загаданного или ниже
+	guessDisplay := widget.NewLabel("Введите ваше первое число!")
+
+	// 4/5 компонент – Инпут для пользовательского ввода
+	userGuessInput := widget.NewEntry()
+	userGuessInput.SetPlaceHolder("Введите ваше число: ")
+
+	// 5/5 компонент – Кнопка "Попробовать"
+	tryGuessButton := widget.NewButton("Попробовать", func() {
+		if guessesLeft == 1 {
+			guessDisplay.SetText("К сожалению, вы не смогли отгадать число " + strconv.Itoa(computerGuess) + ". Сыграйте еще раз!")
+			computerGuessLabel.SetText("Нажмите кнопку ниже, чтобы компьютер загадал число между 0 и 300!")
+			return
+		}
+
+		if guessesLeft == -1 {
+			guessDisplay.SetText("Для начала начните игру!")
+			computerGuessLabel.SetText("Нажмите кнопку ниже, чтобы компьютер загадал число между 0 и 300!")
+			return
+		}
+
+		userGuess, _ := strconv.Atoi(userGuessInput.Text)
+		if userGuess < MinGuess || userGuess > MaxGuess {
+			guessDisplay.SetText("Неправильное число! Введите число между 0 и 300.")
+			return
+		}
+
+		if userGuess == computerGuess {
+			guessDisplay.SetText("Поздравляем! Вы отгадали число " + strconv.Itoa(computerGuess) + " за " + strconv.Itoa(MaxGuessesAmount-guessesLeft+1) + " попыток!")
+			computerGuessLabel.SetText("Нажмите кнопку ниже, чтобы компьютер загадал число между 0 и 300!")
+			return
+		}
+
+		guessesLeft--
+		computerGuessLabel.SetText("Попыток осталось: " + strconv.Itoa(guessesLeft))
+		if userGuess > computerGuess {
+			guessDisplay.SetText("Ваше число больше загаданного!")
+		} else {
+			guessDisplay.SetText("Ваше число меньше загаданного!")
+		}
+	})
+
+	// пихаем все виджеты которые мы создали в наше окно
+	myWindow.SetContent(
+		container.NewVBox(
+			computerGuessLabel,
+			startGameButton,
+			guessDisplay,
+			userGuessInput,
+			tryGuessButton,
+		),
+	)
+
+	// назначаем размер окна и начинаем программу!
+	myWindow.Resize(fyne.NewSize(300, 200))
+	myWindow.ShowAndRun()
+}
